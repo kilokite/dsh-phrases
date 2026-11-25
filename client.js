@@ -552,36 +552,46 @@ window.__ModuleLoader__.load({
         position: absolute;
         left: 0;
         right: 0;
-        bottom: calc(100% + 8px);
+        bottom: calc(100% + 10px);
         z-index: 120;
         display: flex;
         flex-direction: column;
         box-sizing: border-box;
-        max-height: min(360px, 52vh);
-        padding: 4px;
+        max-height: min(440px, 60vh);
+        padding: 6px;
         overflow: hidden;
         color: #1a1a1a;
         background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+        border: 1px solid #e6e8eb;
+        border-radius: 14px;
+        box-shadow:
+          0 16px 40px rgba(15, 23, 42, 0.16),
+          0 2px 8px rgba(15, 23, 42, 0.06);
       }
       .dsp-menu * { box-sizing: border-box; }
       .dsp-menu-head {
         display: flex;
+        flex: none;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
-        padding: 6px 8px 4px;
-        font-size: 11px;
-        line-height: 16px;
+        gap: 12px;
+        padding: 8px 10px 10px;
+        font-size: 12px;
+        line-height: 18px;
         color: #8a8f98;
       }
       .dsp-menu-title {
+        min-width: 0;
+        overflow: hidden;
         font-weight: 600;
         color: #5f6368;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
-      .dsp-menu-hint { white-space: nowrap; }
+      .dsp-menu-hint {
+        flex: none;
+        white-space: nowrap;
+      }
       .dsp-menu-list {
         display: flex;
         flex-direction: column;
@@ -589,16 +599,27 @@ window.__ModuleLoader__.load({
         gap: 2px;
         min-height: 0;
         overflow-y: auto;
+        overscroll-behavior: contain;
         scrollbar-width: thin;
-        scrollbar-color: #c9ccd1 transparent;
+        scrollbar-color: #d3d6db transparent;
       }
+      .dsp-menu-list::-webkit-scrollbar { width: 8px; }
+      .dsp-menu-list::-webkit-scrollbar-button { display: none; }
+      .dsp-menu-list::-webkit-scrollbar-track { background: transparent; }
+      .dsp-menu-list::-webkit-scrollbar-thumb {
+        background: #d3d6db;
+        background-clip: padding-box;
+        border: 2px solid transparent;
+        border-radius: 999px;
+      }
+      .dsp-menu-list::-webkit-scrollbar-thumb:hover { background-color: #b9bdc4; }
       .dsp-item {
         display: flex;
         align-items: flex-start;
-        gap: 8px;
+        gap: 10px;
         width: 100%;
-        min-height: 34px;
-        padding: 6px 8px;
+        min-height: 54px;
+        padding: 9px 10px;
         font: inherit;
         font-size: 13px;
         line-height: 18px;
@@ -606,27 +627,43 @@ window.__ModuleLoader__.load({
         text-align: left;
         background: transparent;
         border: 0;
-        border-radius: 8px;
+        border-radius: 9px;
         cursor: pointer;
       }
       .dsp-item[data-active="true"] {
         background: #f2f3f5;
       }
+      .dsp-item:not([data-active="true"]):hover {
+        background: #f7f8fa;
+      }
+      .dsp-item:focus-visible {
+        outline: 2px solid #4d6bfe;
+        outline-offset: -2px;
+      }
       .dsp-alias {
-        flex: none;
-        margin-top: 1px;
-        padding: 1px 6px;
+        flex: 0 0 48px;
+        padding: 2px 6px;
+        overflow: hidden;
         font-family: var(--ds-font-family-code, ui-monospace, monospace);
         font-size: 11px;
         line-height: 16px;
         color: #5f6368;
-        background: #f2f3f5;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background: #f1f2f4;
         border-radius: 6px;
+      }
+      .dsp-item[data-active="true"] .dsp-alias {
+        background: #e8eaee;
+      }
+      .dsp-alias-empty {
+        background: transparent;
       }
       .dsp-item-main {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 4px;
         min-width: 0;
         flex: 1;
       }
@@ -636,22 +673,27 @@ window.__ModuleLoader__.load({
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .dsp-item-label {
+        font-weight: 500;
+        color: #17181a;
+      }
       .dsp-item-body {
         font-size: 12px;
-        line-height: 16px;
-        color: #5f6368;
+        line-height: 17px;
+        color: #6b7280;
       }
       .dsp-empty {
-        padding: 12px 10px;
+        padding: 16px 12px;
         font-size: 12px;
         line-height: 18px;
         color: #8a8f98;
       }
       .dsp-menu-foot {
         display: flex;
+        flex: none;
         justify-content: flex-end;
-        margin-top: 4px;
-        padding: 6px 4px 2px;
+        margin-top: 6px;
+        padding: 8px 6px 4px;
         border-top: 1px solid #f0f1f3;
       }
       .dsp-link-btn {
@@ -1114,6 +1156,7 @@ window.__ModuleLoader__.load({
       if (!open) return null
 
       const rows = []
+      const showAliasColumn = results.some((phrase) => phrase.alias !== '')
       if (state.status === 'loading' && results.length === 0) {
         rows.push(h('div', { key: 'loading', className: 'dsp-empty' }, t('menu.loading')))
       } else if (results.length === 0) {
@@ -1151,8 +1194,18 @@ window.__ModuleLoader__.load({
                   if (index !== active) setActive(index)
                 },
               },
-              phrase.alias !== ''
-                ? h('span', { className: 'dsp-alias', 'aria-label': t('menu.alias') }, phrase.alias)
+              showAliasColumn
+                ? h(
+                    'span',
+                    phrase.alias === ''
+                      ? { className: 'dsp-alias dsp-alias-empty', 'aria-hidden': 'true' }
+                      : {
+                          className: 'dsp-alias',
+                          'aria-label': `${t('menu.alias')} ${phrase.alias}`,
+                          title: phrase.alias,
+                        },
+                    phrase.alias,
+                  )
                 : null,
               h(
                 'span',
